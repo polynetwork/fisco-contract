@@ -6,11 +6,11 @@ import "./../interface/IEthCrossChainManagerProxy.sol";
 
 contract EthCrossChainManagerProxy is IEthCrossChainManagerProxy, Ownable, Pausable {
     address private EthCrossChainManagerAddr_;
-    
+
     constructor(address _ethCrossChainManagerAddr) public {
         EthCrossChainManagerAddr_ = _ethCrossChainManagerAddr;
     }
-    
+
     function pause() onlyOwner public returns (bool) {
         if (paused()) {
             return true;
@@ -47,5 +47,12 @@ contract EthCrossChainManagerProxy is IEthCrossChainManagerProxy, Ownable, Pausa
     }
     function getEthCrossChainManager() whenNotPaused public view returns (address) {
         return EthCrossChainManagerAddr_;
+    }
+    function changeManagerChainID(uint64 _newChainId) onlyOwner whenPaused public {
+        IUpgradableECCM eccm = IUpgradableECCM(EthCrossChainManagerAddr_);
+        if (!eccm.paused()) {
+            require(eccm.pause(), "Pause old EthCrossChainManager contract failed!");
+        }
+        require(eccm.setChainId(_newChainId), "set chain ID failed. ");
     }
 }

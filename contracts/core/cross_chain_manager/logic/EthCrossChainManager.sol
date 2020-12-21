@@ -15,7 +15,8 @@ contract EthCrossChainManager is IEthCrossChainManager, UpgradableECCM {
     event ChangeBookKeeperEvent(uint256 height, bytes rawHeader);
     event CrossChainEvent(address indexed sender, bytes txId, address proxyOrAssetContract, uint64 toChainId, bytes toContract, bytes rawdata);
     event VerifyHeaderAndExecuteTxEvent(uint64 fromChainID, bytes toContract, bytes crossChainTxHash, bytes fromChainTxHash);
-    constructor(address _eccd) UpgradableECCM(_eccd) public {}
+
+    constructor(address _eccd, uint64 _chainId) UpgradableECCM(_eccd, _chainId) public {}
     
     /* @notice              sync Poly chain genesis block header to smart contrat
     *  @dev                 this function can only be called once, nextbookkeeper of rawHeader can't be empty
@@ -157,7 +158,7 @@ contract EthCrossChainManager is IEthCrossChainManager, UpgradableECCM {
         require(eccd.markFromChainTxExist(toMerkleValue.fromChainID, Utils.bytesToBytes32(toMerkleValue.txHash)), "Save crosschain tx exist failed!");
         
         // Ethereum ChainId is 2, we need to check the transaction is for Ethereum network
-        require(toMerkleValue.makeTxParam.toChainId == uint64(6), "This Tx is not aiming at Ethereum network!");
+        require(toMerkleValue.makeTxParam.toChainId == chainId, "This Tx is not aiming at Ethereum network!");
         
         // Obtain the targeting contract, so that Ethereum cross chain manager contract can trigger the executation of cross chain tx on Ethereum side
         address toContract = Utils.bytesToAddress(toMerkleValue.makeTxParam.toContract);
